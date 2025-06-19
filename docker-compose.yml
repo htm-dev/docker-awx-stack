@@ -20,7 +20,7 @@ services:
       - "./conf/environment.sh:/etc/tower/conf.d/environment.sh"
       - "./conf/credentials.py:/etc/tower/conf.d/credentials.py"
       - "./conf/nginx.conf:/etc/nginx/nginx.conf:ro"
-      - "/opt/awx/redis_socket:/var/run/redis/:rw"
+      - "awx_redis_data:/var/run/redis/:rw"
       - "./projects:/var/lib/awx/projects:rw"
       - "./inventories:/var/lib/awx/inventories:rw"
     environment:
@@ -46,7 +46,7 @@ services:
       - "./conf/SECRET_KEY.txt:/etc/tower/SECRET_KEY"
       - "./conf/environment.sh:/etc/tower/conf.d/environment.sh"
       - "./conf/credentials.py:/etc/tower/conf.d/credentials.py"
-      - "/opt/awx/redis_socket:/var/run/redis/:rw"
+      - "awx_redis_data:/var/run/redis/:rw"
       - "./projects:/var/lib/awx/projects:rw"
       - "./inventories:/var/lib/awx/inventories:rw"
     environment:
@@ -66,7 +66,7 @@ services:
     command: ["/usr/local/etc/redis/redis.conf"]
     volumes:
       - "./conf/redis.conf:/usr/local/etc/redis/redis.conf:ro"
-      - "/opt/awx/redis_socket:/var/run/redis/:rw"
+      - "awx_redis_data:/var/run/redis/:rw"
 
   postgres:
     image: postgres:10
@@ -74,7 +74,7 @@ services:
     restart: unless-stopped
     command: postgres -c listen_addresses='*'
     volumes:
-      - /opt/awx/pgdocker/10/data/:/var/lib/postgresql/data/pgdata:Z
+      - awx_pgdata:/var/lib/postgresql/data/pgdata:Z
     environment:
       POSTGRES_USER: awx
       POSTGRES_PASSWORD: awxpass
@@ -106,6 +106,8 @@ services:
 
 
 volumes:
+  awx_redis_data:
+  awx_pgdata:
   supervisor-socket:
   rsyslog-socket:
   rsyslog-config:
