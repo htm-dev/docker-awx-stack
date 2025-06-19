@@ -84,25 +84,25 @@ services:
       https_proxy: 
       no_proxy: 
 
-  metricbeat:
-    image: docker.elastic.co/beats/metricbeat:7.5.2
-    user: root
-    restart: unless-stopped
-    environment:
-      - KIBANA_HOST='kibana:5601'
-      - ELASTIC_HOST='elasticsearch:9200'
-      - ELASTICSEARCH_USERNAME=elastic
-      - ELASTICSEARCH_PASSWORD=changeme
-      - AWX_DB_USER=awx
-      - AWX_DB_PASS=awxpass
-    command: -system.hostfs=/hostfs
-    volumes:
-      - ./metricbeat/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
-      - /proc:/hostfs/proc:ro
-      - /:/hostfs:ro
-      - ./metricbeat/dashboards:/usr/share/metricbeat/kibana/7/dashboard:ro
+  # metricbeat:
+  #   image: docker.elastic.co/beats/metricbeat:7.5.2
+  #   user: root
+  #   restart: unless-stopped
+  #   environment:
+  #     - KIBANA_HOST='kibana:5601'
+  #     - ELASTIC_HOST='elasticsearch:9200'
+  #     - ELASTICSEARCH_USERNAME=elastic
+  #     - ELASTICSEARCH_PASSWORD=changeme
+  #     - AWX_DB_USER=awx
+  #     - AWX_DB_PASS=awxpass
+  #   command: -system.hostfs=/hostfs
+  #   volumes:
+  #     - ./metricbeat/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+  #     - /proc:/hostfs/proc:ro
+  #     - /:/hostfs:ro
+  #     - ./metricbeat/dashboards:/usr/share/metricbeat/kibana/7/dashboard:ro
 
 
 volumes:
