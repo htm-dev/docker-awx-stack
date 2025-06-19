@@ -1,7 +1,6 @@
 version: "3.8"
 
 services:
-
   web:
     image: ansible/awx:13.0.0
     depends_on:
@@ -24,9 +23,6 @@ services:
       http_proxy: ""
       https_proxy: ""
       no_proxy: ""
-    deploy:
-      restart_policy:
-        condition: on-failure
 
   task:
     image: ansible/awx:13.0.0
@@ -50,21 +46,13 @@ services:
       https_proxy: ""
       no_proxy: ""
       SUPERVISOR_WEB_CONFIG_PATH: '/etc/supervisord.conf'
-    deploy:
-      restart_policy:
-        condition: on-failure
 
   redis:
     image: redis:latest
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--unixsocket", ""]
-    volumes:
-      - ./conf/redis.conf:/usr/local/etc/redis/redis.conf:ro
-      - awx_redis_data:/data
     ports:
       - "6379:6379"
-    deploy:
-      restart_policy:
-        condition: on-failure
+    volumes:
+      - awx_redis_data:/data
 
   postgres:
     image: postgres:10
@@ -79,9 +67,50 @@ services:
       http_proxy: ""
       https_proxy: ""
       no_proxy: ""
-    deploy:
-      restart_policy:
-        condition: on-failure
+
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:7.5.2
+    user: root
+    environment:
+      - KIBANA_HOST=kibana:5601
+      - ELASTIC_HOST=elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=changeme
+      - AWX_DB_USER=awx
+      - AWX_DB_PASS=awxpass
+    command: -system.hostfs=/hostfs
+    volumes:
+      - ./metricbeat/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /proc:/hostfs/proc:ro
+      - /:/hostfs:ro
+      - ./metricbeat/dashboards:/usr/share/metricbeat/kibana/7/dashboard:ro
+    depends_on:
+      - elasticsearch
+      - kibana
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.2
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.5.2
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
 
 volumes:
   awx_redis_data:
@@ -89,3 +118,4 @@ volumes:
   supervisor-socket:
   rsyslog-socket:
   rsyslog-config:
+  elasticsearch_data:
