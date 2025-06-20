@@ -9,6 +9,7 @@ services:
     ports:
       - "80:8052"
     hostname: awxweb
+    entrypoint: ["/bin/sh", "-c", "chmod +x /usr/bin/launch_awx.sh && /usr/bin/launch_awx.sh"]
     volumes:
       - supervisor-socket:/var/run/supervisor
       - rsyslog-socket:/var/run/awx-rsyslog/
